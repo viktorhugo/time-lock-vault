@@ -48,6 +48,7 @@ The project follows a standard dApp architecture:
 - **[Tailwind CSS](https://tailwindcss.com/):** A utility-first CSS framework for rapid UI development.
 - **[Wagmi](https://wagmi.sh/):** A set of React Hooks for Ethereum.
 - **[Viem](https://viem.sh/):** A lightweight, composable, and type-safe library for interacting with Ethereum.
+- **[Reown AppKit](https://reown.com/appkit):** Connect with trusted wallets across EVM, Solana, Bitcoin and more via WalletConnect.
 
 ## 📂 Project Structure
 
@@ -119,6 +120,22 @@ All commands should be run from the `smart-contract` directory.
 - **Compile:** `forge build`
 - **Test:** `forge test`
 - **Deploy:** `forge script script/DeployVault.s.sol --rpc-url $RPC_URL --private-key $PRIVATE_KEY --broadcast`
+
+### Makefile Commands
+
+The `Makefile` in the `smart-contract` directory provides several commands to streamline development:
+
+-   **`make build`**: Compiles the smart contracts.
+-   **`make deploy-testnet-ganache`**: Deploys the contract to a local Ganache testnet.
+-   **`make deploy-testnet-anvil`**: Deploys the contract to a local Anvil testnet.
+-   **`make deploy-testnet-celo`**: Deploys the contract to the Celo Alfajores testnet.
+-   **`make clean`**: Cleans the project build artifacts.
+-   **`make update`**: Updates the project dependencies.
+-   **`make test`**: Runs the test suite.
+-   **`make snapshot`**: Creates a snapshot of the current contract storage layout.
+-   **`make format`**: Formats the Solidity code using `forge fmt`.
+-   **`make anvil`**: Starts a local Anvil node.,
+
 
 ### Frontend
 
