@@ -11,7 +11,7 @@
 </p>
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/gelasss/celo-time-lock-vault/main/ui/public/dapp-screenshot.webp" alt="Time-Lock Vault dApp Screenshot" width="700">
+  <img src="https://raw.githubusercontent.com/viktorhugo/time-lock-vault/refs/heads/master/ui/public/dapp-screenshot.webp" alt="Time-Lock Vault dApp Screenshot" width="700">
 </p>
 
 ## 🌟 Overview
