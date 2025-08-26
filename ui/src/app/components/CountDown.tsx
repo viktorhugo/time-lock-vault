@@ -38,7 +38,7 @@ export default function CountdownComponent({ targetDate }: { targetDate: string 
         return () => clearInterval(timer);
     }, [targetDate]);
 
-    if (!timeLeft) return <p className="text-xl font-bold">🎉  Finished! 🎉</p>;
+    if (!timeLeft) return <p className="text-md font-bold text-center">🎉 Time Finished! 🎉</p>;
 
     return (
         <div className="flex gap-4 text-center mt-2">

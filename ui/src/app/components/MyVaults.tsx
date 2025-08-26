@@ -4,11 +4,13 @@ import { Abi, Address } from "viem";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { contractVaultAddress, vaultAbi } from "../constants";
 import { useReadContract, useWaitForTransactionReceipt, useWriteContract } from "wagmi";
-import { BadgeDollarSign, BanknoteArrowDown, ClockAlert, LockKeyhole, LockKeyholeOpen, ShieldCheck, Smile, UserCheck, Vault } from "lucide-react";
+import { BadgeDollarSign, BanknoteArrowDown, CircleCheckBig, ClockAlert, HandCoins, LockKeyhole, LockKeyholeOpen, ShieldCheck, Smile, UserCheck, Vault } from "lucide-react";
 import Loader from "./Loader";
 import { formatAddress, formatAmount, formatUnlockTime, formatUnlockTimeCountdown, isVaultUnlocked } from "../helpers/vault.helper";
 import { useState } from "react";
 import CountdownComponent from "./CountDown";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useNotify } from "@/context/NotifyContext";
 
 interface MyVaultsProps {
   address: Address | undefined;
@@ -25,6 +27,7 @@ interface Vault {
 export default function MyVaults({ address }: MyVaultsProps) {
 
   const [ withdrawingVaultId, setWithdrawingVaultId] = useState<number | null>(null);
+  const { notify } = useNotify();
   // For creator verification
   const { data: ownerData, isLoading: isOwnerLoading, error: ownerError } = useReadContract({
     abi: vaultAbi as Abi,
@@ -58,16 +61,15 @@ export default function MyVaults({ address }: MyVaultsProps) {
     // setIsCreating(true);
     try {
       await withdrawVault({
-          address: contractVaultAddress as Address, // Updated contract address
-          abi: vaultAbi as Abi,
-          functionName: 'withdraw',
-          args: [BigInt(vaultId)],
-          account: address as Address,
+        address: contractVaultAddress as Address, // Updated contract address
+        abi: vaultAbi as Abi,
+        functionName: 'withdraw',
+        args: [BigInt(vaultId)],
+        account: address as Address,
       })
       setWithdrawingVaultId(vaultId);
     } catch (error) {
-        console.error('Error creating vault:', error);
-        alert('Failed to create vault. Please try again.');
+      console.error('Error creating vault:', error);
     } finally {
       // setIsCreating(false);
     }
@@ -76,7 +78,15 @@ export default function MyVaults({ address }: MyVaultsProps) {
   console.log('isWithdrawingPending:', isWithdrawingPending);
   console.log('withdrawStatus:', withdrawStatus);
   console.log('isWithdrawnFromVaultSuccess:', isWithdrawnFromVaultSuccess);
-  console.log('withdrawError:', withdrawError);
+  
+  if (withdrawError) {
+    console.log('withdrawError:', withdrawError);
+    notify('error', 'Error withdrawing vault', { description: withdrawError.message });
+  }
+
+  if (isWithdrawnFromVaultSuccess) {
+    notify('success', 'Vault withdrawn successfully');
+  }
 
   if (!address) {
     return <p className="text-center text-gray-500">Please connect your wallet to view your vaults.</p>;
@@ -104,16 +114,19 @@ export default function MyVaults({ address }: MyVaultsProps) {
                           <h3 className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-blue-500">
                               Vault #{index + 1}
                           </h3>
+
                           <span className={
-                              `flex items-center justify-center px-3 py-1 text-sm font-semibold rounded-md shadow-md ${vault.isWithdrawn
-                                  ? 'bg-gray-200 text-gray-800'
-                                  : isVaultUnlocked(vault.unlockTime)
-                                      ? 'bg-emerald-100 text-emerald-900'
-                                      : 'bg-rose-100 text-rose-900'
-                              }`
+                            `flex items-center justify-center px-3 py-1 text-sm font-semibold rounded-md shadow-md ${vault.isWithdrawn
+                                ? 'bg-gray-200 text-gray-600'
+                                : isVaultUnlocked(vault.unlockTime)
+                                  ? 'bg-emerald-100 text-emerald-900'
+                                  : 'bg-rose-100 text-rose-900'
+                            }`
                           }>
                             {
-                              !vault.isWithdrawn && isVaultUnlocked(vault.unlockTime)
+                              vault.isWithdrawn
+                              ? <HandCoins className="text-sm font-light mr-1" size={14} />
+                              : isVaultUnlocked(vault.unlockTime)
                                 ? <LockKeyholeOpen className="text-sm font-light mr-1" size={14} />
                                 : <LockKeyhole className="text-sm font-light mr-1" size={14} />
                                 
@@ -178,18 +191,18 @@ export default function MyVaults({ address }: MyVaultsProps) {
                         vault.creator.toLowerCase() === address.toLowerCase() && !vault.isWithdrawn 
                         && isVaultUnlocked(vault.unlockTime) && (
                           <button
-                              onClick={ () => handleWithdrawVault(index + 1) }
-                              disabled={ withdrawingVaultId === index + 1 }
-                              className="mt-3 w-full px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 
+                              onClick={ () => handleWithdrawVault(index) }
+                              disabled={ withdrawingVaultId === index + 1  && isWithdrawingPending }
+                              className=" cursor-pointer mt-3 w-full px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 
                               focus:ring-green-500 focus:ring-offset-2 transition-colors duration-200 font-medium disabled:bg-gray-400 disabled:cursor-not-allowed 
                               flex items-center justify-center space-x-2"
                           >
                             { 
-                              withdrawingVaultId === index + 1 && withdrawStatus === "pending"
+                              withdrawingVaultId === index + 1 && isWithdrawingPending
                               ? (
                                   <>
-                                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                                      <span>Withdrawing...</span>
+                                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                                    <span>Withdrawing...</span>
                                   </>
                               ) : (
                                 <>
@@ -199,6 +212,21 @@ export default function MyVaults({ address }: MyVaultsProps) {
                               )
                             }
                           </button>
+                        )
+                      }
+                      {
+                        vault.creator.toLowerCase() === address.toLowerCase() && vault.isWithdrawn 
+                        && isVaultUnlocked(vault.unlockTime) && (
+                          <Alert className=" bg-green-50 border-green-200 rounded-lg p-3 mt-2">
+                            <AlertDescription className="grid grid-cols-12 text-white text-md  items-center justify-center gap-2">
+                                <div className="col-span-1 justify-center">
+                                    <CircleCheckBig className="text-xl text-green-800" size={20} />
+                                </div>
+                                <div className="col-span-11">
+                                    <p className="text-sm text-green-800 font-medium">Successfully withdrawn!</p>
+                                </div>
+                            </AlertDescription >
+                        </Alert>
                         )
                       }
                     </div>

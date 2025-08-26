@@ -6,7 +6,7 @@ import { contractVaultAddress, vaultAbi } from '../constants';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { CircleCheckBig, CircleSlash, ListChecks, ListTodo, LoaderCircle, ShieldAlert } from 'lucide-react';
+import { CircleCheckBig, CirclePlus, LoaderCircle, ShieldAlert } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
 export default function VaultCreation({ address, balance }: { address: Address | undefined, balance: string }) {
@@ -152,8 +152,8 @@ export default function VaultCreation({ address, balance }: { address: Address |
             <CardFooter className="flex flex-col items-stretch">
                 <Button
                     onClick={HandleCreateVault}
-                    disabled={isCreating || !address || Number(vaultAmount) <= 0 || getTotalSeconds() === 0}
-                    className="w-full justify-center mb-2 text-md font-semibold"
+                    disabled={(!vaultAmount || vaultAmount === '') || isCreating || !address || Number(vaultAmount) <= 0 || getTotalSeconds() === 0}
+                    className="cursor-pointer w-full justify-center mb-2 text-md font-semibold"
                 >
 
                     {
@@ -163,9 +163,9 @@ export default function VaultCreation({ address, balance }: { address: Address |
                                 Creating Vault...
                             </>
                         ) : (
-                            <div className="flex items-center justify-center gap-2">  
+                            <div className="flex items-center justify-center gap-2 ">  
                                 Create Vault
-                                <ListTodo size={25} className="color-white"/>
+                                <CirclePlus size={25} className="color-white"/>
                             </div>
                         )
                     }
